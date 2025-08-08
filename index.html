@@ -135,13 +135,8 @@
   </dialog>
 
   <script>
-    // ===== קונפיג (שנה אם השרת על דומיין אחר) =====
     const API_BASE = '';
-
-    // ===== מצב =====
     const state = { items: [], filter: '' };
-
-    // ===== עזרים =====
     const $ = sel => document.querySelector(sel);
     const gallery = $('#gallery');
 
@@ -173,15 +168,13 @@
       wrap.innerHTML = names.map(n => `<button class="iconbtn" data-chip="${n}">${escapeHtml(n)}</button>`).join('');
     }
 
-    function escapeHtml(s){ return s?.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch])) }
+    function escapeHtml(s){ return s?.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',''':'&#39;'}[ch])) }
 
-    // ===== API =====
     async function apiGet(path){ const r = await fetch(API_BASE+path); if(!r.ok) throw new Error('שגיאת שרת'); return r.json(); }
     async function apiDelete(path){ const r = await fetch(API_BASE+path, {method:'DELETE'}); if(!r.ok) throw new Error('שגיאת מחיקה'); return r.json(); }
 
     async function loadItems(){ state.items = await apiGet('/api/photos'); render(); }
 
-    // ===== העלאה =====
     const fileInput = $('#fileInput');
     const addBtn = $('#addBtn');
     const friendEl = $('#friend');
@@ -207,7 +200,6 @@
       }catch(err){ alert(err.message); }
     });
 
-    // ===== גרירה ושחרור =====
     const dropzone = $('#uploader');
     ['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
     ;['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
@@ -228,7 +220,6 @@
       }catch(err){ alert(err.message); }
     });
 
-    // ===== חיפוש וסינון =====
     const searchEl = $('#search');
     const clearFilter = $('#clearFilter');
     searchEl.addEventListener('input', () => { state.filter = searchEl.value; render(); });
@@ -238,30 +229,6 @@
       if(!chip) return; searchEl.value = chip.dataset.chip; state.filter = chip.dataset.chip; render();
     });
 
-    // ===== פעולות כרטיס =====
-    gallery.addEventListener('click', async e => {
-      const btn = e.target.closest('[data-act]');
-      const art = e.target.closest('.card');
-      if(!btn || !art) return;
-      const id = art.dataset.id;
-      const item = state.items.find(x => x.id === id);
-      if(!item) return;
-
-      if(btn.dataset.act === 'del'){
-        if(confirm('למחוק את התמונה?')){
-          try{ await apiDelete('/api/photos/'+id); state.items = state.items.filter(x => x.id !== id); render(); }
-          catch(err){ alert('מחיקה נכשלה'); }
-        }
-      }
-      if(btn.dataset.act === 'open') openLightbox(item);
-      if(btn.dataset.act === 'copy'){
-        navigator.clipboard.writeText(location.origin + item.url).then(()=>{
-          btn.textContent = '✔️ הועתק'; setTimeout(()=>btn.textContent='קישור',1200);
-        });
-      }
-    });
-
-    // ===== לייטבוקס =====
     const dlg = document.querySelector('#lightbox');
     const lbImg = document.querySelector('#lbImg');
     const lbFriend = document.querySelector('#lbFriend');
@@ -287,7 +254,6 @@
       }
     });
 
-    // ===== אתחול =====
     loadItems().catch(()=> alert('שגיאה בטעינת גלריה – בדוק שהשרת פעיל'));
   </script>
 </body>
